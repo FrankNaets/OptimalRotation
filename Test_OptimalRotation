@@ -1,0 +1,36 @@
+clear all
+close all
+clc
+
+% This files demonstrates the use of T_mat_OptimRotation for finding the best rotation matrix between two 3D point clouds.
+
+
+%% Generate a reference point cloud:
+n = 10;
+x0 = randn(3,n);
+x0(1,:) = x0(1,:)*5; % add some directionality to the point cloud
+
+%% Apply rotation:
+
+% Generate random set of Euler parameters:
+p = randn(4,1);
+p = p/sqrt(p'*p); 
+
+R = [p(1)^2+p(2)^2-p(3)^2-p(4)^2, 2*p(2)*p(3)- 2*p(1)*p(4), 2*p(2)*p(4)+2*p(1)*p(3);
+    2*p(2)*p(3)+2*p(1)*p(4), p(1)^2-p(2)^2+p(3)^2-p(4)^2, 2*p(3)*p(4)-2*p(1)*p(2);
+    2*p(2)*p(4)-2*p(1)*p(3), 2*p(3)*p(4)+2*p(1)*p(2), p(1)^2-p(2)^2-p(3)^2+p(4)^2];
+
+x = R*x0;
+
+%% Compute closest fit rotation:
+[R, dRdx] = T_mat_OptimRotation(x,x0);
+
+x2 = R*x;
+
+figure
+plot3(x0(1,:), x0(2,:), x0(3,:), 'o',...
+    x(1,:), x(2,:), x(3,:), 'x',...
+    x2(1,:), x2(2,:), x2(3,:), 's','linewidth', 2)
+grid on, axis equal, xlabel('x'), ylabel('y'), zlabel('z')
+legend('initial', 'rotated','back-rotated')
+
